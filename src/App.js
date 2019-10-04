@@ -6,7 +6,6 @@ import UserCard from "components/UserCard";
 import FollowersList from "components/FollowersList";
 import FollowerCard from "components/FollowerCard";
 
-
 const Style = styled.div`
   box-sizing: border-box;
   max-width: 1000px;
@@ -41,6 +40,7 @@ class App extends Component {
     super();
     this.state = {
       currentUser: "depadiernos",
+      submitting: false,
       user: {},
       followers: []
     };
@@ -51,6 +51,10 @@ class App extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    if (prevState.submitting !== this.state.submitting) {
+      this.fetchUser();
+      this.setState({ submitting: false });
+    }
     if (prevState.user !== this.state.user) {
       this.fetchFollowers();
     }
@@ -81,13 +85,17 @@ class App extends Component {
       });
   };
 
+  handleSubmit = event => {
+    event.preventDefault();
+    this.setState({ submitting: true });
+  };
+
   handleChange = event => {
     this.setState({ currentUser: event.target.value });
   };
 
-  handleSubmit = event => {
-    event.preventDefault();
-    this.fetchUser();
+  handleFollowerClick = follower => {
+    this.setState({ currentUser: follower, submitting: true });
   };
 
   render() {
@@ -106,10 +114,14 @@ class App extends Component {
         </form>
         <UserCard user={this.state.user}>
           <FollowersList>
-          {this.state.followers.map(follower => (
-          <FollowerCard key={follower.id} follower={follower} onClick={this.handleFollowerClick}/>
-        ))}
-        </FollowersList>
+            {this.state.followers.map(follower => (
+              <FollowerCard
+                key={follower.id}
+                follower={follower}
+                onClick={() => this.handleFollowerClick(follower.login)}
+              />
+            ))}
+          </FollowersList>
         </UserCard>
       </Style>
     );
